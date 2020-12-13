@@ -29,7 +29,7 @@ function App() {
         count++;
       }
     }
-    //storing ALL distances between each point in the array for sorting
+    // storing ALL distances between each point in the array for sorting
     newArray.forEach(element => {
       const distCollection = []
       newArray.forEach(point => {
@@ -37,9 +37,13 @@ function App() {
         const y = (element.position[1] - point.position[1]) * (element.position[1] - point.position[1]);
         const z = (element.position[2] - point.position[2]) * (element.position[2] - point.position[2]);
         const dist = x + y + z
+        // adding 'index' property because the mergeSort method requires both 'value' and 'index'
         const index = newArray.indexOf(point)
         distCollection.push({ value: dist, index: index, ID: point.ID })
       });
+      // sorting by distance, for now, is to assume all clusters are spacially related
+      // but in reality concepts can be related from far away 
+      // think 'apple', 'red', 'blood', related but potentially spacially far apart
       mergeSort(distCollection)
       element.edges = [
         distCollection[2].ID,
@@ -76,8 +80,6 @@ function App() {
 
   const spread = (name) => {
     const edges = array[name].edges.filter(edge => array[edge].ready);
-    // console.log(edges)
-    // const edges = edges1.filter(edge => array[edge].ready);
     if (edges.length) {
       const random = Math.floor(Math.random() * edges.length);
       const edge = edges[random];
