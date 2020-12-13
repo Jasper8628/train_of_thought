@@ -53,29 +53,13 @@ function App() {
         distCollection[6].ID
       ]
     });
-
     setArray(newArray)
   }
   const [array, setArray] = useState([]);
 
   const handleClick = (e) => {
-    const color = e.object.userData.color;
-    console.log(color)
     const name = e.object.name;
-    const edges = e.object.userData.edges.filter(edge => array[edge].ready);
-    console.log(edges)
-    const array2 = [...array]
-    array2[name].color = "red";
-    array2[name].ready = false;
-    const random = Math.floor(Math.random() * 3);
-    const edge = edges[random];
-    setArray(array2);
-    spread(edge)
-    setTimeout(() => {
-      array2[name].color = 'teal';
-      array2[name].ready = true
-      setArray(array2);
-    }, 1200);
+    spread(name);
   }
 
   const spread = (name) => {
@@ -103,12 +87,11 @@ function App() {
       const random = Math.floor(Math.random() * 1369)
       spread(random)
     }
-
   }
   return (
     <>
       <Canvas
-      //  camera={{ position: [-5, 2, 10], fov: 1700 }}
+        camera={{ position: [5, 2, 10], fov: 1700 }}
       >
         <ambientLight intensity={0.1} />
         <pointLight position={[-10, 0, -20]} intensity={0.5} />
