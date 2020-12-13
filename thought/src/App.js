@@ -22,6 +22,7 @@ function App() {
         let z = Math.sin(i) * r;
         newArray.push({
           ID: count,
+          ready: true,
           position: [x, y, z],
           color: 'teal'
         })
@@ -40,9 +41,13 @@ function App() {
         distCollection.push({ value: dist, index: index, ID: point.ID })
       });
       mergeSort(distCollection)
-      element.edges = [distCollection[4].ID,
-      distCollection[2].ID,
-      distCollection[3].ID]
+      element.edges = [
+        distCollection[2].ID,
+        distCollection[3].ID,
+        distCollection[4].ID,
+        distCollection[5].ID,
+        distCollection[6].ID
+      ]
     });
 
     setArray(newArray)
@@ -53,35 +58,49 @@ function App() {
     const color = e.object.userData.color;
     console.log(color)
     const name = e.object.name;
-    const edges = e.object.userData.edges;
+    const edges = e.object.userData.edges.filter(edge => array[edge].ready);
+    console.log(edges)
     const array2 = [...array]
-    array2[name].color = "red"
-    setArray(array2);
+    array2[name].color = "red";
+    array2[name].ready = false;
     const random = Math.floor(Math.random() * 3);
     const edge = edges[random];
+    setArray(array2);
     spread(edge)
+    setTimeout(() => {
+      array2[name].color = 'teal';
+      array2[name].ready = true
+      setArray(array2);
+    }, 1200);
   }
 
   const spread = (name) => {
-    console.log(name)
-    let edges = array[name].edges;
-    const random = Math.floor(Math.random() * 3);
-    const edge = edges[random];
-    setTimeout(() => {
-      const array2 = [...array];
-      array2[name].color = 'red';
-      setArray(array2);
+    const edges = array[name].edges.filter(edge => array[edge].ready);
+    // console.log(edges)
+    // const edges = edges1.filter(edge => array[edge].ready);
+    if (edges.length) {
+      const random = Math.floor(Math.random() * edges.length);
+      const edge = edges[random];
       setTimeout(() => {
-        array2[name].color = 'blue';
+        const array2 = [...array];
+        array2[name].color = 'red';
+        array2[name].ready = false;
         setArray(array2);
         setTimeout(() => {
-          array2[name].color = 'teal';
+          array2[name].color = 'blue';
           setArray(array2);
-
-        }, 2400);
-      }, 800);
-      spread(edge)
-    }, 100);
+          setTimeout(() => {
+            array2[name].color = 'teal';
+            array2[name].ready = true
+            setArray(array2);
+          }, 1200);
+        }, 400);
+        spread(edge)
+      }, 100);
+    } else {
+      const random = Math.floor(Math.random() * 1369)
+      spread(random)
+    }
 
   }
   return (
@@ -113,7 +132,7 @@ function App() {
                 edges={position.edges}
                 position={position.position}
                 newColor={
-                  position.ID <= 0 ? 'red' :
+                  position.ID <= 0 ? 'yellow' :
                     position.color} />
             ))
             : <Box position={[0, 0, 0]} />

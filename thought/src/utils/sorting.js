@@ -1,6 +1,6 @@
 export default function mergeSort(array) {
   divide(array)
-  // console.log(array);
+  // console.log(array.length);
   function divide(array) {
     if (array.length < 2) {
       return array;
