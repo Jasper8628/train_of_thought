@@ -2,75 +2,33 @@ import React, { useRef, useEffect, useState } from 'react';
 import './App.css';
 import { Canvas, useFrame } from 'react-three-fiber';
 import { OrbitControls } from 'drei';
-import { EventDispatcher } from 'three';
-// import { Box } from 'drei';
-
-const Box = ({ position, newColor, edges }) => {
-  const [color, setColor] = useState('')
-  const mesh = useRef(null)
-
-  const handler = (e) => {
-    console.log('number of edges: ' + e.object.userData.edges)
-    if (color !== 'red') {
-      setColor('red')
-      setTimeout(() => {
-        setColor('')
-      }, 1000);
-    } else {
-      setColor('teal')
-    }
-  }
-  useFrame(() => {
-    mesh.current.rotation.x = mesh.current.rotation.y += 0.01;
-
-  })
-  return (
-    <mesh position={position} ref={mesh} userData={{ message: 'message', edges: edges, position: position }} onClick={handler} >
-      <sphereBufferGeometry attach='geometry' args={[0.2, 500]} />
-      <meshStandardMaterial attach='material' color={color ? color : newColor} />
-    </mesh>
-
-  )
-}
+import mergeSort from './utils/sorting';
+import Box from './components/box';
 
 function App() {
-  // const r = 10;
   useEffect(() => {
     loop();
-  }, [])
+  }, []);
+
   const loop = () => {
     const newArray = []
     let count = 0;
     const r = 6;
-    const incr = 0.3;
-    for (let i = -3; i < 3; i = i + incr) {
-      for (let j = -3; j < 3; j = j + incr) {
+    const incr = 0.17;
+    for (let i = 0; i < 6.28; i = i + incr) {
+      for (let j = 0; j < 6.28; j = j + incr) {
         let x = Math.cos(j) * Math.cos(i) * r;
         let y = Math.sin(j) * Math.cos(i) * r;
         let z = Math.sin(i) * r;
-
-        let x1 = Math.cos(j) * Math.cos(i + incr) * r;
-        let y1 = Math.sin(j) * Math.cos(i + incr) * r;
-        let z1 = Math.sin(i + incr) * r;
-        let x2 = Math.cos(j) * Math.cos(i - incr) * r;
-        let y2 = Math.sin(j) * Math.cos(i - incr) * r;
-        let z2 = Math.sin(i - incr) * r;
-        let x3 = Math.cos(j + incr) * Math.cos(i) * r;
-        let y3 = Math.sin(j + incr) * Math.cos(i) * r;
-        let z3 = Math.sin(i) * r;
-        let x4 = Math.cos(j - incr) * Math.cos(i) * r;
-        let y4 = Math.sin(j - incr) * Math.cos(i) * r;
-        let z4 = Math.sin(i) * r;
-
         newArray.push({
           ID: count,
           position: [x, y, z],
-          edges: [[x1, y1, z1], [x2, y2, z2], [x3, y3, z3], [x4, y4, z4]],
-          color: 'blue'
+          color: 'teal'
         })
         count++;
       }
     }
+    //storing ALL distances between each point in the array for sorting
     newArray.forEach(element => {
       const distCollection = []
       newArray.forEach(point => {
@@ -78,15 +36,54 @@ function App() {
         const y = (element.position[1] - point.position[1]) * (element.position[1] - point.position[1]);
         const z = (element.position[2] - point.position[2]) * (element.position[2] - point.position[2]);
         const dist = x + y + z
-        distCollection.push({ distance: dist, position: point.position })
+        const index = newArray.indexOf(point)
+        distCollection.push({ value: dist, index: index, ID: point.ID })
       });
-      element.edges = distCollection.length
+      mergeSort(distCollection)
+      element.edges = [distCollection[4].ID,
+      distCollection[2].ID,
+      distCollection[3].ID]
     });
 
     setArray(newArray)
   }
   const [array, setArray] = useState([]);
-  // }, [array])
+
+  const handleClick = (e) => {
+    const color = e.object.userData.color;
+    console.log(color)
+    const name = e.object.name;
+    const edges = e.object.userData.edges;
+    const array2 = [...array]
+    array2[name].color = "red"
+    setArray(array2);
+    const random = Math.floor(Math.random() * 3);
+    const edge = edges[random];
+    spread(edge)
+  }
+
+  const spread = (name) => {
+    console.log(name)
+    let edges = array[name].edges;
+    const random = Math.floor(Math.random() * 3);
+    const edge = edges[random];
+    setTimeout(() => {
+      const array2 = [...array];
+      array2[name].color = 'red';
+      setArray(array2);
+      setTimeout(() => {
+        array2[name].color = 'blue';
+        setArray(array2);
+        setTimeout(() => {
+          array2[name].color = 'teal';
+          setArray(array2);
+
+        }, 2400);
+      }, 800);
+      spread(edge)
+    }, 100);
+
+  }
   return (
     <>
       <Canvas
@@ -109,11 +106,14 @@ function App() {
         {
           array.length !== 0 ?
             array.map((position, index) => (
-              <Box key={index}
+              <Box
+                handleClick={handleClick}
+                key={index}
+                name={position.ID}
                 edges={position.edges}
                 position={position.position}
                 newColor={
-                  position.ID <= 10 ? 'red' :
+                  position.ID <= 0 ? 'red' :
                     position.color} />
             ))
             : <Box position={[0, 0, 0]} />
