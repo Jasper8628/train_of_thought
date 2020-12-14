@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
-import { Canvas, useFrame } from 'react-three-fiber';
+import { Canvas } from 'react-three-fiber';
 import { OrbitControls } from 'drei';
 import mergeSort from './utils/sorting';
 import Box from './components/box';
@@ -14,9 +14,12 @@ function App() {
     const newArray = []
     let count = 0;
     const r = 6;
-    const incr = 0.17;
+    const incr = 0.14;
     for (let i = 0; i < 6.28; i = i + incr) {
-      for (let j = 0; j < 6.28; j = j + incr) {
+      const temp = Math.tan(i) * incr;
+      const abs = Math.abs(temp)
+      console.log('logging cos i: ' + abs);
+      for (let j = 0; j < 6.28; j = j + incr + abs) {
         let x = Math.cos(j) * Math.cos(i) * r;
         let y = Math.sin(j) * Math.cos(i) * r;
         let z = Math.sin(i) * r;
@@ -67,11 +70,12 @@ function App() {
     if (edges.length) {
       const random = Math.floor(Math.random() * edges.length);
       const edge = edges[random];
+      const array2 = [...array];
+      array2[name].color = 'red';
+      array2[name].ready = false;
+      setArray(array2);
       setTimeout(() => {
-        const array2 = [...array];
-        array2[name].color = 'red';
-        array2[name].ready = false;
-        setArray(array2);
+        spread(edge)
         setTimeout(() => {
           array2[name].color = 'blue';
           setArray(array2);
@@ -81,7 +85,6 @@ function App() {
             setArray(array2);
           }, 1200);
         }, 400);
-        spread(edge)
       }, 100);
     } else {
       const random = Math.floor(Math.random() * 1369)
